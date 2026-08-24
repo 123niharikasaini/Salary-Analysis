@@ -1,7 +1,7 @@
 # Salary/Compensation Analysis: Does Experience Predict Salary More Than Skillset?
 
 **Source:** Stack Overflow Developer Survey 2025 (US respondents only, n=4,652 after cleaning)
-**Tools:** MySQL (SQL layer), Python (pandas, scipy, statsmodels)
+**Tools:** MySQL (SQL layer), Python (pandas, matplotlib, seaborn, scipy, statsmodels)
 
 ## The Question
 
@@ -9,15 +9,15 @@ The common assumption in tech hiring and career advice is that years of experien
 
 ## Pipeline
 
-1. **Data cleaning** (Python/pandas) — column selection, outlier detection, missing-data handling
-2. **SQL layer** (MySQL) — normalized schema, aggregate queries, window functions
-3. **Statistical testing** (scipy) — t-tests, one-way ANOVA, Tukey HSD post-hoc
-4. **Regression** (statsmodels) — multiple linear regression on log-transformed salary, with VIF and residual diagnostics
-5. **Conclusion** — synthesis of findings against the original question
+1. **Data cleaning** (Python/pandas) - column selection, outlier detection, missing-data handling
+2. **SQL layer** (MySQL) - normalized schema, aggregate queries, window functions
+3. **Statistical testing** (scipy) - t-tests, one-way ANOVA, Tukey HSD post-hoc
+4. **Regression** (statsmodels) - multiple linear regression on log-transformed salary, with VIF and residual diagnostics
+5. **Conclusion** - synthesis of findings against the original question
 
 ## Data Preparation
 
-**Columns used:** `ConvertedCompYearly` (target — SO's own USD-normalized salary, used instead of `CompTotal` to avoid cross-currency comparison issues), `WorkExp` (professional experience, chosen over `YearsCode` to exclude hobby/personal-project time), `Country` (filtered to United States only, to avoid cross-country salary confounding), `RemoteWork`, `DevType`, `EdLevel`, `OrgSize`, `LanguageHaveWorkedWith`.
+**Columns used:** `ConvertedCompYearly` (target - SO's own USD-normalized salary, used instead of `CompTotal` to avoid cross-currency comparison issues), `WorkExp` (professional experience, chosen over `YearsCode` to exclude hobby/personal-project time), `Country` (filtered to United States only, to avoid cross-country salary confounding), `RemoteWork`, `DevType`, `EdLevel`, `OrgSize`, `LanguageHaveWorkedWith`.
 
 **Scope decision:** Database, Platform, Webframe, and DevEnvs skill categories were excluded from this iteration in favor of programming language alone, to keep the model interpretable and avoid excessive multicollinearity from one-hot-encoding dozens of near-collinear tech categories. A natural extension would test whether adding these improves predictive power.
 
@@ -49,12 +49,12 @@ Normalized schema: `respondents` (one row per person) and `respondent_language` 
 
 Salary climbs sharply through the first 10-15 years, then flattens and *slightly reverses* past 20 years — an early signal that experience's relationship with salary is not simply linear, and that raw, uncontrolled averages may overstate its effect once other factors change alongside it (more senior people also tend to shift roles, company sizes, etc.).
 
-**Top-paying languages by role** (window function, ranked within `DevType`, minimum 20 respondents per group): produced role-specific top-3 language rankings. This table is descriptive/directional only — it does not control for confounds like experience, and should not be read as a causal ranking of "valuable" languages per role.
+**Top-paying languages by role** (window function, ranked within `DevType`, minimum 20 respondents per group): produced role-specific top-3 language rankings. This table is descriptive/directional only - it does not control for confounds like experience, and should not be read as a causal ranking of "valuable" languages per role.
 
 ## Statistical Testing
 
 **T-tests** (used to validate merge/grouping decisions during cleaning):
-- Remote vs. In-person salary: t=7.477, p≈1.86×10⁻¹³ — strong, highly significant difference.
+- Remote vs. In-person salary: t=7.477, p≈1.86×10⁻¹³ - strong, highly significant difference.
 - Two hybrid RemoteWork variants against each other: t=0.770, p=0.442 — not significantly different (informed the grouping decision, though ultimately not merged in the final categorical variable to preserve granularity for ANOVA).
 
 **One-way ANOVA** (salary across categorical groups):
@@ -102,13 +102,3 @@ Based on this analysis, **experience matters, but its effect is smaller and more
 - Regression coefficients describe statistical association, not causation — particularly for language effects, which may partly reflect unobserved factors (e.g., industry, specific employer) not captured in this dataset.
 - Skillset analysis limited to programming languages; database, platform, and framework skills were excluded from this iteration and are a natural extension.
 - Some multicollinearity present among missing-data "Unknown" categories and the largest DevType category; interpreted and disclosed above rather than corrected for, since correcting would have required discarding real information (see VIF discussion).
-
-## Repository Structure
-
-```
-README.md
-/sql/            -- schema.sql, queries.sql
-/notebooks/       -- 01_cleaning.ipynb, 02_stats_and_regression.ipynb
-/images/           -- correlation_heatmap.png, residual_diagnostics.png
-requirements.txt
-```
