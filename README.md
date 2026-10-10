@@ -1,4 +1,4 @@
-# Salary/Compensation Analysis: Does Experience Predict Salary More Than Skillset?
+# Salary Analysis: Does Experience Predict Salary More Than Skillset?
 
 **Source:** Stack Overflow Developer Survey 2025 (US respondents only, n=4,652 after cleaning)
 **Tools:** MySQL (SQL layer), Python (pandas, matplotlib, seaborn, scipy, statsmodels)
